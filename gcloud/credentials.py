@@ -27,7 +27,7 @@ class Credentials(object):
                              given to you when you created the service
                              account).
 
-    :type scope: tuple of strings
+    :type scope: string or tuple of strings
     :param scope: The scope against which to authenticate.
                   (Different services require different scopes,
                   check the documentation for which scope is required
