@@ -1,91 +1,63 @@
 import httplib2
-
-from gcloud.datastore import datastore_v1_pb2 as datastore_pb
-from gcloud.datastore import helpers
-from gcloud.datastore.dataset import Dataset
-from gcloud.datastore.transaction import Transaction
+import json
 
 
-class Connection(object):
-  """A connection to the Google Cloud Datastore via the Protobuf API.
+from gcloud import connection
+
+
+class Connection(connection.Connection):
+  """A connection to Google Cloud Storage via the JSON REST API.
 
   This class should understand only the basic types (and protobufs)
   in method arguments, however should be capable of returning advanced types.
 
-  :type credentials: :class:`gcloud.credentials.Credentials`
+  :type credentials: :class:`gcloud.datastore.credentials.Credentials`
   :param credentials: The OAuth2 Credentials to use for this connection.
   """
-
-  API_BASE_URL = 'https://www.googleapis.com'
-  """The base of the API call URL."""
 
   API_VERSION = 'v1beta2'
   """The version of the API, used in building the API call's URL."""
 
-  API_URL_TEMPLATE = ('{api_base}/datastore/{api_version}'
-                      '/datasets/{dataset_id}/{method}')
+  API_URL_TEMPLATE = '{api_base}/storage/{api_version}'
   """A template used to craft the URL pointing toward a particular API call."""
 
-  _EMPTY = object()
-  """A pointer to represent an empty value for default arguments."""
-
-  def __init__(self, credentials=None):
-    self._credentials = credentials
-    self._current_transaction = None
-    self._http = None
-
-  @property
-  def http(self):
-    """A getter for the HTTP transport used in talking to the API.
-
-    :rtype: :class:`httplib2.Http`
-    :returns: A Http object used to transport data.
-    """
-
-    if not self._http:
-      self._http = httplib2.Http()
-      if self._credentials:
-        self._http = self._credentials.authorize(self._http)
-    return self._http
-
-  def _request(self, dataset_id, method, data):
+  def _request(self, method, bucket_id, resource=None, data=None):
     """Make a request over the Http transport to the Cloud Datastore API.
 
-    :type dataset_id: string
-    :param dataset_id: The ID of the dataset of which to make the request.
-
     :type method: string
-    :param method: The API call method name (ie, ``runQuery``, ``lookup``, etc)
+    :param method: The HTTP method name (ie, ``GET``, ``POST``, etc)
+
+    :type bucket_id: string
+    :param bucket_id: The ID of the bucket in which to make the request.
+
+    :type resource: string
+    :param resource: ...
 
     :type data: string
     :param data: The data to send with the API call.
-                 Typically this is a serialized Protobuf string.
 
     :rtype: string
     :returns: The string response content from the API call.
 
     :raises: Exception if the response code is not 200 OK.
     """
+
     headers = {
-        'Content-Type': 'application/x-protobuf',
+        'Accept-Encoding': 'gzip',
+        'Content-Type': 'application/json',
         'Content-Length': str(len(data)),
         }
     headers, content = self.http.request(
-        uri=self.build_api_url(dataset_id=dataset_id, method=method),
-        method='POST', headers=headers, body=data)
+        uri=self.build_api_url(bucket_id=bucket_id, resource=resource),
+        method=method, headers=headers, body=data)
 
     if headers['status'] != '200':
       raise Exception('Request failed. Error was: %s' % content)
 
     return content
 
-  def _rpc(self, dataset_id, method, request_pb, response_pb_cls):
-    response = self._request(dataset_id=dataset_id, method=method,
-                             data=request_pb.SerializeToString())
-    return response_pb_cls.FromString(response)
-
   @classmethod
-  def build_api_url(cls, dataset_id, method, base_url=None, api_version=None):
+  def build_api_url(cls, bucket_id, resource=None, base_url=None, api_version=None):
     """Construct the URL for a particular API call.
 
     This method is used internally
@@ -97,8 +69,8 @@ class Connection(object):
     :param dataset_id: The ID of the dataset to connect to.
                        This is usually your project name in the cloud console.
 
-    :type method: string
-    :param method: The API method to call (ie, runQuery, lookup, ...).
+    :type resource: string
+    :param method: A sub-resource to operate on (ie, 'o/{object_id}', ...).
 
     :type base_url: string
     :param base_url: The base URL where the API lives.
@@ -111,7 +83,8 @@ class Connection(object):
     return cls.API_URL_TEMPLATE.format(
         api_base=(base_url or cls.API_BASE_URL),
         api_version=(api_version or cls.API_VERSION),
-        dataset_id=dataset_id, method=method)
+        bucket_id=bucket_id,
+        method=method or '', resource=resource or '')
 
   def transaction(self, transaction=_EMPTY):
     if transaction is self._EMPTY:
