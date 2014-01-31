@@ -30,7 +30,7 @@ class Connection(object):
     :rtype: :class:`httplib2.Http`
     :returns: A Http object used to transport data.
     """
-    if not getattr(self, '_http'):
+    if not hasattr(self, '_http'):
       self._http = httplib2.Http()
       if self._credentials:
         self._http = self._credentials.authorize(self._http)
