@@ -21,7 +21,7 @@ The main concepts with this API are:
   which represents a particular bucket
   (akin to a mounted disk on a computer).
 
-- ?? :class:`gcloud.storage.key.Key`
+- :class:`gcloud.storage.key.Key`
   which represents a pointer
   to a particular entity in Cloud Storage
   (akin to a file path on a remote machine).
@@ -30,6 +30,7 @@ The main concepts with this API are:
 
 __version__ = '0.1'
 
+# TODO: Allow specific scopes and authorization levels.
 SCOPE = ('https://www.googleapis.com/auth/devstorage.full_control',
          'https://www.googleapis.com/auth/devstorage.read_write')
 
