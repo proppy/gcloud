@@ -1,4 +1,11 @@
-:tocdepth: 2
+:maxdepth: 1
+
+.. toctree::
+  :hidden:
+
+  datastore-api
+  storage-api
+  common-api
 
 Google Cloud Python API
 =======================
@@ -20,13 +27,19 @@ Cloud Datastore
 - Google's `official documentation <https://developers.google.com/datastore/>`_
 - :doc:`datastore-quickstart`
 - :doc:`datastore-getting-started`
-- :doc:`datastore-api`
+- :doc:`Cloud Datastore API Documentation <datastore-api>`
 
 Cloud Storage
 -------------
 
 - Google's `official documentation <https://developers.google.com/storage/>`_
-- :doc:`storage-api`
+- :doc:`storage-quickstart`
+- :doc:`Cloud Storage API Documentation <storage-api>`
+
+Common modules
+--------------
+
+- :doc:`Common Module API Documentation <common-api>`
 
 How to contribute
 -----------------

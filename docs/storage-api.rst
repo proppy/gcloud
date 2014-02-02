@@ -1,5 +1,5 @@
-Cloud Storage API Documentation
-===============================
+Cloud Storage
+=============
 
 :mod:`gcloud.storage`
 -----------------------
@@ -29,6 +29,14 @@ Keys
 ----
 
 .. automodule:: gcloud.storage.key
+  :members:
+  :undoc-members:
+  :show-inheritance:
+
+Iterators
+---------
+
+.. automodule:: gcloud.storage.iterator
   :members:
   :undoc-members:
   :show-inheritance:
